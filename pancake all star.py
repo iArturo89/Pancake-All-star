@@ -20,40 +20,36 @@ def sucesores(estado: List[str]) -> List[Tuple[List[str], int]]:
     return suces
 
 
-def ida_estrella(estado_inicial: List[int], estado_objetivo: List[int]) -> Tuple[List[int], int]:
-    limite = heuristica(estado_inicial)
-    camino = [estado_inicial]
-    while True:
-        t = busqueda(camino, 0, limite, estado_objetivo)
-        if t == "ENCONTRADO":
-            return camino, limite
-        if t == float('inf'):
-            return [], float('inf')
-        limite = t
-
-def busqueda(camino: List[List[int]], g: int, limite: int, estado_objetivo: List[int]) -> Union[str, int]:
-    nodo = camino[-1]
-    f = g + heuristica(nodo)
-    if f > limite:
-        return f
-    if nodo == estado_objetivo:
-        return "ENCONTRADO"
-    min_costo = float('inf')
-    for sucesor, costo in sucesores(nodo):
-        if sucesor not in camino:
-            camino.append(sucesor)
-            t = busqueda(camino, g+costo, limite, estado_objetivo)
-            if t == "ENCONTRADO":
-                return "ENCONTRADO"
-            if t < min_costo:
-                min_costo = t
-            camino.pop()
-    return min_costo
+def a_estrella(estado_inicial: List[int], estado_objetivo: List[int]) -> Tuple[List[int], int]:
+    abiertos = [(heuristica(estado_inicial), estado_inicial, 0)]
+    cerrados = set()
+    padres = {tuple(estado_inicial): None}
+    costo_camino = {tuple(estado_inicial): 0}
+    while abiertos:
+        f, nodo, g = heappop(abiertos)
+        if nodo == estado_objetivo:
+            # Se llegó al objetivo, construir el camino y devolver
+            camino = []
+            while nodo:
+                camino.append(nodo)
+                nodo = padres[tuple(nodo)]
+            return camino[::-1], costo_camino[tuple(camino[-1])]
+        cerrados.add(tuple(nodo))
+        for sucesor, costo in sucesores(nodo):
+            if tuple(sucesor) in cerrados:
+                continue
+            nuevo_costo = costo_camino[tuple(nodo)] + costo
+            if nuevo_costo < costo_camino.get(tuple(sucesor), float('inf')):
+                costo_camino[tuple(sucesor)] = nuevo_costo
+                f = nuevo_costo + heuristica(sucesor)
+                heappush(abiertos, (f, sucesor, nuevo_costo))
+                padres[tuple(sucesor)] = nodo
+    return [], float('inf')
 
 # Ejemplo de uso:
 estado_inicial = ['d', 'b', 'c', 'a']
 estado_objetivo = ['a', 'b', 'c', 'd']
-camino, costo = ida_estrella(estado_inicial, estado_objetivo)
+camino, costo = a_estrella(estado_inicial, estado_objetivo)
 print("Pasos:", len(camino) - 1)
 print("Camino:", camino)
 print("Costo:", costo)
