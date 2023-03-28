@@ -49,7 +49,6 @@ def a_estrella(estado_inicial: List[int], estado_objetivo: List[int]) -> Tuple[L
 # Ejemplo de uso:
 estado_inicial = ['d', 'b', 'c', 'a']
 estado_objetivo = ['a', 'b', 'c', 'd']
-camino, costo = a_estrella(estado_inicial, estado_objetivo)
-print("Pasos:", len(camino) - 1)
+camino = a_estrella(estado_inicial, estado_objetivo)
 print("Camino:", camino)
-print("Costo:", costo)
+
